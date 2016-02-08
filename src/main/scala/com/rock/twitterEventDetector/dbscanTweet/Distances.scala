@@ -2,9 +2,7 @@ package com.rock.twitterEventDetector.dbscanTweet
 
 import java.util.Date
 
-import com.rock.twitterFlashMobDetector.dbscanClustering.distance.Similarity
-import com.rock.twitterFlashMobDetector.model.annotation.SimpleDbpediaResource
-import model.Model.AnnotatedTweetWithDbpediaResources
+import com.rock.twitterEventDetector.model.Model.DbpediaResource
 import org.apache.spark.mllib.linalg.SparseVector
 import PairWiseDistances._
 
@@ -57,11 +55,12 @@ object Distances {
   /**
     * evaluate the similarity between two sets of dbpedia Resources,
     * if one of the sets is empty will return the max similarity
+    *
     * @param resourcesA
     * @param resourcesB
     * @return
     */
-  def semanticSimilarity(resourcesA:Set[SimpleDbpediaResource],resourcesB:Set[SimpleDbpediaResource]):Double={
+  def semanticSimilarity(resourcesA:Set[DbpediaResource], resourcesB:Set[DbpediaResource]):Double={
     val semanticSim=if(resourcesA.size>0 && resourcesB.size>0){
       pairWiseSetSim(resourcesA,resourcesB)
     }else 1.0

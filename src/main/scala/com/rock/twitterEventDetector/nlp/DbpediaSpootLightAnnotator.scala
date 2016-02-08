@@ -3,22 +3,17 @@ package com.rock.twitterEventDetector.nlp
 import java.net.URLEncoder
 import java.util
 
-import com.rock.twitterEventDetector.dbscanScala.model.Model.DbpediaAnnotation
+import com.rock.twitterEventDetector.model.Model.DbpediaAnnotation
 import com.rock.twitterEventDetector.model.Model.{Tweet, DbpediaAnnotation, AnnotationType}
 import com.rock.twitterEventDetector.model.Model.AnnotationType.AnnotationType
 import com.rock.twitterEventDetector.nlp.annotator.RestClient
-import com.rock.twitterFlashMobDetector.model.annotation.Annotation
-import com.rock.twitterFlashMobDetector.nlp.annotator.rest.RestClient
-import edu.stanford.nlp.ling.{HasWord, TaggedWord}
-import model.Model.AnnotationType
-import model.Model.AnnotationType._
-import model.Model._
+ import edu.stanford.nlp.ling.{HasWord, TaggedWord}
+
 import org.json.{JSONArray, JSONObject}
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.IndexedSeq
 import scala.util.{Try, Success, Failure}
-import model._
 
 /**
   * Created by rocco on 30/01/2016.

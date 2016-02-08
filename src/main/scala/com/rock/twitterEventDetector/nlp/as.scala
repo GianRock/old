@@ -55,7 +55,7 @@ object as {
       c.foreach(
         x=>println(x.toMaps)
       )
-      DbpediaAnnotationCollection.insertDbpediaAnnotationsOfTweet(2433l,c)
+      //DbpediaAnnotationCollection.insertDbpediaAnnotationsOfTweet(2433l,c)
 
 
     }

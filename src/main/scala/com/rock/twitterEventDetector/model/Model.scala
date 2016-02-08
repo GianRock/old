@@ -3,11 +3,10 @@ package com.rock.twitterEventDetector.model
 import java.io.Serializable
 import java.util.Date
 
-import com.hp.hpl.jena.reasoner.IllegalParameterException
-import com.mongodb.BasicDBObject
+ import com.mongodb.BasicDBObject
 import com.mongodb.casbah.commons.MongoDBObject
-import com.rock.twitterFlashMobDetector.model.annotation.SimpleDbpediaResource
-import model.Model.AnnotationType.AnnotationType
+import com.rock.twitterEventDetector.model.Model.AnnotationType.AnnotationType
+import org.apache.lucene.search.similarities.Similarity
 import org.apache.spark.mllib.linalg.SparseVector
 
 /**
@@ -42,14 +41,17 @@ object Model {
     */
   case class HashTag(text:String,indices:Tuple2[Int,Int])
   case class AnnotatedTweet(val tweet:Tweet,val tfIdfVector:SparseVector,val urisDbpedia:List[String])
-  case class AnnotatedTweetWithDbpediaResources(val tweet:Tweet,val tfIdfVector:SparseVector, val dbpediaResoruceSet:Set[SimpleDbpediaResource])
+  case class AnnotatedTweetWithDbpediaResources(val tweet:Tweet,val tfIdfVector:SparseVector, val dbpediaResoruceSet:Set[DbpediaResource])
 
   /**
     *
     * @param uriDBpedia
     * @param inLinks
     */
-  case class DbpediaResource(val uriDBpedia:String,val inLinks:Set[String])
+  case class DbpediaResource(val uriDBpedia:String,val inLinks:Set[String]) extends Similarity[DbpediaResource]{
+    override def calculateSimilarity(that:DbpediaResource)=1.0
+  }
+
 
 
   case class DbpediaAnnotation(val surfaceText:String, val start:Int, val kindOf:AnnotationType, val uriDBpedia:String){

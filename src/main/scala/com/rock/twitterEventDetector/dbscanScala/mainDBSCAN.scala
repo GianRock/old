@@ -38,8 +38,8 @@ object mainDBSCAN {
       x=>println(x._1+" idcluster "+x._2)
     )
    val clusteredCoordinates= coordinateRDD.leftOuterJoin(connectedComponents).map {
-      case (id, (coordinate, Some(cluster))) => (coordinate.getX+","+coordinate.getY+","+ cluster)
-       case (id, (coordinate, None)) => (coordinate.getX+","+coordinate.getY+","+"-2")
+      case (id, (coordinate, Some(cluster))) => (coordinate.x+","+coordinate.y+","+ cluster)
+       case (id, (coordinate, None)) => (coordinate.x+","+coordinate.y+","+"-2")
     }
     /**
     val clusterdCoordinates = coordinateRDD.join(connectedComponents).map {

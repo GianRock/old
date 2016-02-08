@@ -4,18 +4,16 @@ import java.{util, lang}
 import java.util.Date
 
 import com.mongodb.casbah.commons.Imports
-import com.mongodb.hadoop.{MongoOutputFormat, BSONFileOutputFormat}
-import com.rock.twitterFlashMobDetector.db.mongoDB.{AnnotationsCollection, DbpediaResourceMongo, LshTableCollections, TweetsCollection}
-import com.rock.twitterFlashMobDetector.model.annotation.SimpleDbpediaResource
-import com.rock.twitterFlashMobDetector.model.twitter.MyTweet
-import com.rock.twitterFlashMobDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
-import com.rock.twitterFlashMobDetector.utility.Constants
+import com.mongodb. hadoop.{MongoOutputFormat, BSONFileOutputFormat}
+import com.rock.twitterEventDetector.lsh.LSHModel
+import com.rock.twitterEventDetector.model.Model.{AnnotatedTweetWithDbpediaResources, AnnotatedTweet, Tweet}
+import com.rock.twitterEventDetector.nlp.DbpediaSpootLightAnnotator
+import com.rock.twitterEventDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
+
 import com.twitter.chill.Tuple2Serializer
-import edu.berkeley.cs.amplab.spark.indexedrdd.{IndexedRDD, KeySerializer}
-import lsh.{LSH, LSHModel}
-import model.Model.{DbpediaAnnotation, AnnotatedTweetWithDbpediaResources, AnnotatedTweet, Tweet}
-import mongoSpark.{DbpediaAnnotationCollection, SparkMongoIntegration}
-import nlp.DbpediaSpootLightAnnotator
+import edu.berkeley.cs.amplab.spark.indexedrdd.IndexedRDD
+
+
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.graphx.{Graph, VertexId, VertexRDD}
 import org.apache.spark.mllib.feature.{HashingTF, IDF, Normalizer}
@@ -27,10 +25,8 @@ import org.bson.BSONObject
 import scala.collection.JavaConverters._
 import scala.collection.{Map, mutable}
 import scala.collection.parallel.ParSeq
-import edu.berkeley.cs.amplab.spark.indexedrdd.IndexedRDD._
 
-import Distances._
-import nlp.NlpPipeLine._
+
 
 case class MyTuple2(val band:Int,val signature:String)
 /**
