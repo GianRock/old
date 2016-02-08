@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.mongoSpark
+package com.rock.twitterEventDetector.mongoSpark
 
 import java.util.{Calendar, Date, GregorianCalendar}
 

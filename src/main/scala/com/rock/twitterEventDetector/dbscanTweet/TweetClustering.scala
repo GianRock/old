@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.dbscanTweet
+package com.rock.twitterEventDetector.dbscanTweet
 
 import java.{util, lang}
 import java.util.Date

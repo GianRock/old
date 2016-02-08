@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.lsh
+package com.rock.twitterEventDetector.lsh
 
 /**
  * Created by maruf on 09/08/15.

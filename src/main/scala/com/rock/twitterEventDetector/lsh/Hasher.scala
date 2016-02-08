@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.lsh
+package com.rock.twitterEventDetector.lsh
 
 import org.apache.spark.mllib.linalg.SparseVector
 

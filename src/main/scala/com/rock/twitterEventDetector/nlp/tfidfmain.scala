@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.nlp
+package com.rock.twitterEventDetector.nlp
 
 import java.io.InputStream
 import java.util

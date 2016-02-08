@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.nlp
+package com.rock.twitterEventDetector.nlp
 
 import com.rock.twitterFlashMobDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
 import model.Model.{AnnotatedTweet, Tweet}

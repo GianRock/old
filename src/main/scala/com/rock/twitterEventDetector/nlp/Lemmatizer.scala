@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala
+package com.rock.twitterEventDetector
 
 import java.util
 import java.util.Properties

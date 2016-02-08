@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.dbscanTweet
+package com.rock.twitterEventDetector.dbscanTweet
 
 import com.rock.twitterFlashMobDetector.dbscanClustering.distance.Similarity
 import scala.collection.JavaConversions._

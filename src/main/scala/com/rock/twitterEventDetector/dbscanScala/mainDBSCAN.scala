@@ -1,5 +1,10 @@
 package com.rock.twitterEventDetector.dbscanScala
 
+import org.apache.spark.SparkConf
+import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.graphx.{VertexId, VertexRDD}
+import org.apache.spark.rdd.RDD
+
 /**
   * Created by rocco on 23/01/2016.
   */

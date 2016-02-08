@@ -1,4 +1,4 @@
-package com.rock.twitterEventDetector.dbscanScala.graphxDbscan
+package com.rock.twitterEventDetector.graphxDbscan
 
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.graphx.{Graph, GraphLoader, VertexId, VertexRDD}

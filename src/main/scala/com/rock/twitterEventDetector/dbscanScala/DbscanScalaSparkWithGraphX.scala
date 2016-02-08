@@ -1,5 +1,9 @@
 package com.rock.twitterEventDetector.dbscanScala
 
+import org.apache.spark.graphx.{Graph, VertexId, VertexRDD}
+import org.apache.spark.rdd.RDD
+import org.apache.spark.{AccumulableParam, SparkContext}
+
 import scala.collection.{Map, mutable}
 
 /**

@@ -1,5 +1,5 @@
 
-package com.rock.twitterEventDetector.dbscanScala.lsh
+package com.rock.twitterEventDetector.lsh
 
 import java.util.{Calendar, Date, GregorianCalendar}
 

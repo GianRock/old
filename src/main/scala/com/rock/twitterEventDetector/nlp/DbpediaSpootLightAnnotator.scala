@@ -1,8 +1,12 @@
-package com.rock.twitterEventDetector.dbscanScala.nlp
+package com.rock.twitterEventDetector.nlp
 
 import java.net.URLEncoder
 import java.util
 
+import com.rock.twitterEventDetector.dbscanScala.model.Model.DbpediaAnnotation
+import com.rock.twitterEventDetector.model.Model.{Tweet, DbpediaAnnotation, AnnotationType}
+import com.rock.twitterEventDetector.model.Model.AnnotationType.AnnotationType
+import com.rock.twitterEventDetector.nlp.annotator.RestClient
 import com.rock.twitterFlashMobDetector.model.annotation.Annotation
 import com.rock.twitterFlashMobDetector.nlp.annotator.rest.RestClient
 import edu.stanford.nlp.ling.{HasWord, TaggedWord}
@@ -75,6 +79,7 @@ class DbpediaSpootLightAnnotator extends  Serializable{
     * the annotations returned by the DbpediaSpootligh Annotator.
     * Before submitting the text to the annotator, it first checks if
     * the the tweet is altready annotated.
+ *
     * @param tweet
     * @return
     */
