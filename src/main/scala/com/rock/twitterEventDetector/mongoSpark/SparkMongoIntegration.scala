@@ -3,16 +3,14 @@ package com.rock.twitterEventDetector.mongoSpark
 import java.util.{Calendar, Date, GregorianCalendar}
 
 import com.mongodb.hadoop.MongoInputFormat
-import com.rock.twitterFlashMobDetector.db.mongoDB.TweetsCollection
-import com.rock.twitterFlashMobDetector.model.twitter.MyTweet
-import com.rock.twitterFlashMobDetector.utility.Constants
-import nlp.DbpediaSpootLightAnnotator
-import org.apache.hadoop.conf.Configuration
+import com.rock.twitterEventDetector.configuration.Constant
+import com.rock.twitterEventDetector.model.Model.{DbpediaAnnotation, Tweet}
+import com.rock.twitterEventDetector.nlp.DbpediaSpootLightAnnotator
+  import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.bson.{BSONObject, Document}
 import org.joda.time.DateTime
-import model.Model._
 
 import scala.collection.JavaConverters._
 /**
@@ -25,15 +23,13 @@ object SparkMongoIntegration {
   def HOUR_MILLISEC:Long=3600000L;
   /**
     *
-    * @param sc
-    * @param query
-    * @return
-    */
+
+
   def getTweetsAsRDD(sc:SparkContext,query:Document,  createSplits:Boolean=true):RDD[(Long,MyTweet)]={
 
     val mongoConfig = new Configuration()
     mongoConfig.set("mongo.input.uri",
-      "mongodb://localhost:27017/"+ Constants.MONGO_DB_NAME+ "." + Constants.MONGO_TWEET_COLLECTION_NAME)
+      "mongodb://localhost:27017/"+ Constant.MONGO_DB_NAME+ "." + Constant.MONGO_TWEET_COLLECTION_NAME)
     if(query!=null)
       mongoConfig.set("mongo.input.query", query.toJson)
     //  mongoConfig.set("mongo.input.key","created_at")
@@ -49,7 +45,7 @@ object SparkMongoIntegration {
       }
     tweets
 
-  }
+  }    */
   /**
     *
     * @param sc
@@ -60,7 +56,7 @@ object SparkMongoIntegration {
 
     val mongoConfig = new Configuration()
     mongoConfig.set("mongo.input.uri",
-      "mongodb://localhost:27017/"+ Constants.MONGO_DB_NAME+ "." + Constants.MONGO_TWEET_COLLECTION_NAME)
+      "mongodb://localhost:27017/"+ Constant.MONGO_DB_NAME+ "." + Constant.MONGO_TWEET_COLLECTION_NAME)
     if(query!=null)
       mongoConfig.set("mongo.input.query", query.toJson)
     mongoConfig.set("mongo.input.split.create_input_splits", "" + createSplits)
@@ -108,7 +104,7 @@ object SparkMongoIntegration {
   def getTweetsFromDateOffset(sc:SparkContext,startDate: Date,hourNumbers:Int):RDD[(Long,Tweet)]={
 
     val endDate=new Date(startDate.getTime+HOUR_MILLISEC*hourNumbers)
-    val conditions:List[Document]=  List(new Document("created_at",new Document("$gt",startDate)) ,
+    val conditions:List[Document]=  List(new Document("created_at",new Document("$gte",startDate)) ,
       new Document("created_at",new Document("$lt", endDate)));
     val query: Document = new Document("$and", conditions.toList.asJava)
     getTweetsAsTupleRDD(sc,query,false)
@@ -156,15 +152,15 @@ object SparkMongoIntegration {
 
     val startStringDate="2012-10-10T01:00:01Z";
     val endStringDate="2012-10-11T01:00:01Z"
-    val conditions:List[Document]=  List(new Document("created_at",new Document("$gte",TweetsCollection.findMinDateValue())) ,
-      new Document("created_at",new Document("$lt", endTime)));
-    val query: Document = new Document("$and", conditions.toList.asJava)
+  //  val conditions:List[Document]=  List(new Document("created_at",new Document("$gte",TweetCollection.findMinDateValue) ,
+      //new Document("created_at",new Document("$lt", endTime)))
+    //val query: Document = new Document("$and", conditions.toList.asJava)
      val sparkConf = new SparkConf()
       .setAppName("LSH")
       .setMaster("local[*]")
     val sc = new SparkContext("local", "SparkExample", sparkConf)
 
-    val tweets: RDD[(Long, Tweet)] =getTweetsAsTupleRDD(sc,query,false)
+    val tweets: RDD[(Long, Tweet)] =getTweetsAsTupleRDD(sc,null,false)
 
 
 

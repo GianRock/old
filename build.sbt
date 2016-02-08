@@ -19,6 +19,7 @@ libraryDependencies++=Seq(
   "org.mongodb.mongo-hadoop" % "mongo-hadoop-core" % "1.4.2",
   "org.apache.httpcomponents" % "httpcore" % "4.2.4",
   "org.apache.httpcomponents" % "httpclient" % "4.2.4",
+  "org.apache.commons" % "commons-pool2" % "2.3",
   "org.apache.lucene" % "lucene-core" % "5.2.1",
   "org.apache.lucene" % "lucene-analyzers-common" % "5.2.1",
   "org.apache.lucene" % "lucene-queryparser" % "5.2.1",

@@ -1,8 +1,6 @@
 package com.rock.twitterEventDetector.nlp.indexing;
 
-import com.rock.twitterFlashMobDetector.db.mongoDB.TweetsCollection;
-import com.rock.twitterFlashMobDetector.model.twitter.MyTweet;
-import org.apache.lucene.analysis.Analyzer;
+  import org.apache.lucene.analysis.Analyzer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -125,54 +123,5 @@ public class AnalyzerDemo {
 		            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 		}
 		
-		public static void main2(String[] args) {
-			String accented="aáeéiíoóöőuúüű AÁEÉIÍOÓÖŐUÚÜŰ"
-					;
-		//	ZemantaAnnotationService annotator=new ZemantaAnnotationService();
- 
-			String norma=  Normalizer.normalize(accented, Form.NFD);//"The flashmob proposal they did on Grey's 😍😍😍"
-			String unacc=removeAccents(norma);
-			System.out.println(unacc);
- 			List<MyTweet> tweets=TweetsCollection.findAllTweets();
-			int i=0;
-			for (MyTweet myTweet : tweets) {
-				String cleanedText=myTweet.getCleanedText();
-				String utf8tweet = "";
- 		            byte[] utf8Bytes;
-					try {
-						utf8Bytes = cleanedText.getBytes("UTF-8");
-						 utf8tweet = new String(utf8Bytes, "UTF-8");
 
-					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-		           
-		        
-		      
-				String newCleanedText=utf8tweet.replaceAll("\\p{So}+", "");
-				if(!cleanedText.equals(newCleanedText)){
-					// ts.updateCleanedText(myTweet.getId(), newCleanedText);
-					i++;
-					 System.out.printf(" Il tweet id:%d%n contiene delle faccine  %n", myTweet.getId());
-					//System.out.println("OLD TEXT "+cleanedText);
-					//System.out.println("NEW  TEXT "+newCleanedText);
-					 
-			} 
-		}
-			System.out.println("ci sono "+i+" stringhe contenenti le faccine");
-			String with="can we please do a flash mob to this😂 just me and you😂";
-			byte[] utf8Bytes;
-			try {
-				utf8Bytes = with.getBytes("UTF-8");
-				with = new String(utf8Bytes, "UTF-8");
-				String newCleanedText=with.replaceAll("\\p{So}+", "");
-				System.out.println(newCleanedText);
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-}
 }

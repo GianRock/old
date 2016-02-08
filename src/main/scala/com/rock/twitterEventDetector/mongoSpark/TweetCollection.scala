@@ -1,13 +1,32 @@
 package com.rock.twitterEventDetector.mongoSpark
 
+import com.mongodb.{BasicDBObject, DBObject}
 import com.mongodb.casbah._
-
+import com.mongodb.casbah.commons.MongoDBObject
+import com.rock.twitterEventDetector.configuration.Constant
+import com.rock.twitterEventDetector.model.Model.{DbpediaAnnotation, DbpediaResource, Tweet}
+import com.rock.twitterEventDetector.nlp.DbpediaSpootLightAnnotator
+import  com.rock.twitterEventDetector.configuration.Constant._
 import scala.concurrent.Future
 
 /**
   * Created by rocco on 07/02/16.
   */
 object TweetCollection {
+
+
+
+
+  def findTweetById(idTweet:Long):Option[Tweet]={
+    val res: BasicDBObject =MongoClient("localhost", 27017)(Constant.MONGO_DB_NAME).getCollection(Constant.MONGO_TWEET_COLLECTION_NAME).findOne(MongoDBObject("_id"->idTweet)).asInstanceOf[BasicDBObject]
+
+    if(res!=null){
+     Some(new Tweet(res))
+
+    }
+    else None
+
+  }
 
   /**
     * Shows a pinWheel in the console.err
@@ -84,7 +103,13 @@ object TweetCollection {
   }
 
   def main(args: Array[String]) {
-    TweetCollection.findAllTweets()
+    //TweetCollection.findAllTweets()
+
+   val tweet= TweetCollection.findTweetById(256230354485145600L)
+    tweet match{
+      case(Some(x))=>print(x)
+      case (None)=>println(" id notFound")
+    }
   }
 
 }

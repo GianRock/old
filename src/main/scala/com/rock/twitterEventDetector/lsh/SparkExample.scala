@@ -4,8 +4,7 @@ package com.rock.twitterEventDetector.lsh
 import java.util.{Calendar, Date, GregorianCalendar}
 
 import com.mongodb.hadoop.MongoInputFormat
-import com.rock.twitterFlashMobDetector.model.twitter.MyTweet
-import com.rock.twitterFlashMobDetector.utility.Constants
+import com.rock.twitterEventDetector.configuration.Constant
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
@@ -50,7 +49,7 @@ object SparkExample extends App{
   // If using BSON, use "mapred.input.dir" to configure the directory
   // where the BSON files are located instead.
   mongoConfig.set("mongo.input.uri",
-    "mongodb://localhost:27017/"+ Constants.MONGO_DB_NAME+ "." + Constants.MONGO_TWEET_COLLECTION_NAME)
+    "mongodb://localhost:27017/"+ Constant.MONGO_DB_NAME+ "." + Constant.MONGO_TWEET_COLLECTION_NAME)
   mongoConfig.set("mongo.input.query", query.toJson)
   val sparkConf = new SparkConf()
   val sc = new SparkContext("local", "SparkExample", sparkConf)
@@ -60,8 +59,8 @@ object SparkExample extends App{
     classOf[MongoInputFormat],  // InputFormat
     classOf[Object],            // Key type
     classOf[BSONObject])        // Value type
-  val tweets: RDD[(Long, MyTweet)] =documents.map{ case(id:Object,tweetBson:BSONObject)=>(id.asInstanceOf[Long],new MyTweet(tweetBson))}
-  println(tweets.count())
+  //val tweets: RDD[(Long, MyTweet)] =documents.map{ case(id:Object,tweetBson:BSONObject)=>(id.asInstanceOf[Long],new MyTweet(tweetBson))}
+//  println(tweets.count())
 
 }
 

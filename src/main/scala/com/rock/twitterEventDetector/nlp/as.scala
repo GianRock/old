@@ -4,13 +4,8 @@ import java.io.InputStream
 import java.util
 import javax.annotation.Resource
 
-import com.rock.twitterEventDetector.dbscanScala.model.Model.DbpediaAnnotation
-import com.rock.twitterEventDetector.dbscanScala.mongoSpark.DbpediaAnnotationCollection
-import com.rock.twitterEventDetector.dbscanScala.nlp.PosTagger
 import com.rock.twitterEventDetector.model.Model.DbpediaAnnotation
 import edu.stanford.nlp.ling.TaggedWord
-import model.Model.DbpediaAnnotation
-import mongoSpark.DbpediaAnnotationCollection
 import scala.io.Source._
 import scala.collection.immutable.TreeMap
 import scala.reflect.io.Path

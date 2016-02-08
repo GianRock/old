@@ -1,7 +1,7 @@
 package com.rock.twitterEventDetector.nlp
 
-import com.rock.twitterFlashMobDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
-import model.Model.{AnnotatedTweet, Tweet}
+//import com.rock.twitterFlashMobDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
+//import model.Model.{AnnotatedTweet, Tweet}
 import org.apache.spark.graphx._
 import org.apache.spark.mllib.feature.{Normalizer, IDF, HashingTF}
 import org.apache.spark.mllib.linalg.{SparseVector, Vector}

@@ -2,6 +2,8 @@ package com.rock.twitterEventDetector.mongoSpark
 
 import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.{BasicDBObject, DBObject, MongoException}
+import com.rock.twitterEventDetector.model.Model.DbpediaAnnotation
+import com.rock.twitterEventDetector.configuration.Constant._
 
 import scala.collection.JavaConverters._
 
@@ -23,6 +25,11 @@ object DbpediaAnnotationCollection {
 
 
   }
+
+  /**
+    *
+    * @param annotations
+    */
   def inserDbpediaAnnotations(  annotations:Iterator[(Long, Option[List[DbpediaAnnotation]])])={
 
 

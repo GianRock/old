@@ -1,6 +1,8 @@
 package com.rock.twitterEventDetector.mongoSpark
 
 import com.mongodb.casbah.commons.MongoDBObject
+import com.rock.twitterEventDetector.nlp.indexing.MyAnalyzer
+import com.rock.twitterEventDetector.nlp.indexing.AnalyzerUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 /*
@@ -42,6 +44,7 @@ object MongoScalaWordCount {
       classOf[Object],            // Key type
       classOf[BSONObject]).filter(x=>x._2.containsField("cleaned_text"))        // Value type
     documents.cache()
+    /*
     val words: RDD[String] = documents mapPartitions {
       it => {
         val analyzer = new MyAnalyzer()
@@ -87,7 +90,7 @@ object MongoScalaWordCount {
       outputConfig)
     // save.saveAsNewAPIHadoopFile("file:///this-is-completely-unused", classOf[AnyRef], classOf[BSONObject], classOf[MongoOutputFormat[_, _]], outputConfig)
     sc.stop()
-
+*/
 
   }
 }

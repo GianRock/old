@@ -3,15 +3,15 @@ package com.rock.twitterEventDetector.nlp
 import java.io.InputStream
 import java.util
 
-import com.rock.twitterFlashMobDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
 import edu.berkeley.cs.amplab.spark.indexedrdd.IndexedRDD
 import edu.berkeley.cs.amplab.spark.indexedrdd.IndexedRDD._
-import lsh.tfidfmain._
 import org.apache.spark.mllib.feature.{HashingTF, IDF, Normalizer}
 import org.apache.spark.mllib.linalg.{SparseVector, Vector}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
+import com.rock.twitterEventDetector.nlp.indexing.MyAnalyzer
+import com.rock.twitterEventDetector.nlp.indexing.AnalyzerUtils
 import scala.collection.JavaConverters._
 import scala.collection.parallel.immutable.ParMap
 

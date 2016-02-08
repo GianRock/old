@@ -1,7 +1,9 @@
+/*
 package com.rock.twitterEventDetector.dbscanTweet
 
 import java.{util, lang}
 import java.util.Date
+import edu.berkeley.cs.amplab.spark.indexedrdd.{IndexedRDD, KeySerializer}
 
 import com.mongodb.casbah.commons.Imports
 import com.mongodb. hadoop.{MongoOutputFormat, BSONFileOutputFormat}
@@ -12,7 +14,7 @@ import com.rock.twitterEventDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
 
 import com.twitter.chill.Tuple2Serializer
 import edu.berkeley.cs.amplab.spark.indexedrdd.IndexedRDD
-
+import com.rock.twitterEventDetector.dbscanTweet.Distances._
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.graphx.{Graph, VertexId, VertexRDD}
@@ -215,6 +217,8 @@ object TweetClustering {
     //objectNeighborsList.toList.foreach(x=>println(x._1+"  candidate List neighnbor "+x._2))
 
     val annotatedtweetsCollected: Seq[(Long, AnnotatedTweet)] =annotatedTweets.collect().toSeq
+
+    /*
     val annotatedWithResources=annotatedtweetsCollected.map{
       annotatetTweet=> {
         val dbpediaResources =annotatetTweet._2.urisDbpedia.map {
@@ -222,7 +226,7 @@ object TweetClustering {
         }.toSet
         (annotatetTweet._1,new  AnnotatedTweetWithDbpediaResources(annotatetTweet._2.tweet,annotatetTweet._2.tfIdfVector,dbpediaResources))
       }
-    }.toSeq
+    }.toSeq*/
 
 
 
@@ -253,7 +257,7 @@ object TweetClustering {
             if(timeSimilarity>=0){
               val cosSim =  cosineSimilarity(annotatedTweetA.tfIdfVector, annotatedTweetB.tfIdfVector)
               if((1-cosSim)<=2*eps){
-                val semanticSim=semanticSimilarity(annotatedTweetA.dbpediaResoruceSet,annotatedTweetB.dbpediaResoruceSet)
+                val semanticSim=Distances.semanticSimilarity(annotatedTweetA.dbpediaResoruceSet,annotatedTweetB.dbpediaResoruceSet)
 
                 val similarity=timeSimilarity*((cosSim+semanticSim)/2)
                 val distance=1d-similarity
@@ -518,3 +522,4 @@ object TweetClustering {
 }
 
 
+*/

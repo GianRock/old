@@ -3,11 +3,10 @@ package com.rock.twitterEventDetector.model
 import java.io.Serializable
 import java.util.Date
 
- import com.mongodb.BasicDBObject
+ import com.mongodb.{DBObject, BasicDBObject}
 import com.mongodb.casbah.commons.MongoDBObject
 import com.rock.twitterEventDetector.model.Model.AnnotationType.AnnotationType
-import org.apache.lucene.search.similarities.Similarity
-import org.apache.spark.mllib.linalg.SparseVector
+ import org.apache.spark.mllib.linalg.SparseVector
 
 /**
   * Created by rocco on 01/02/2016.
@@ -27,6 +26,17 @@ object Model {
     * @param splittedHashTags
     */
   case class Tweet(id:Long,text:String,createdAt:Date,hashTags:List[String],splittedHashTags:Option[String]){
+    def this(bsonDoc:BasicDBObject) =
+      this(bsonDoc.getLong("_id"),bsonDoc.getString("cleaned_text"),bsonDoc.getDate("created_at"),List.empty[String],None)
+
+
+
+
+
+
+
+
+
     def timeSimilarity(that:Tweet):Double={
 
       0d
