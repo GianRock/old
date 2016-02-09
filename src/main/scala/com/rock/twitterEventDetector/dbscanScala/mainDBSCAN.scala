@@ -11,7 +11,7 @@ import org.apache.spark.rdd.RDD
 object mainDBSCAN {
 
   def main(args: Array[String]) {
-    val logFile: String = "./resource/AggregationDatasetstep1-8.txt"
+    val logFile: String = "AggregationDatasetstep1-8.txt"
 
     val conf: SparkConf = new SparkConf().setAppName("Simple Application").setMaster("local[16]").set("spark.executor.memory", "1g")
     //SparkConf conf = new SparkConf().setAppName("Simple Application");
@@ -33,10 +33,8 @@ object mainDBSCAN {
 
 
     val dbscan=new DbscanScalaSparkWithGraphX(coordinateRDD,"sparkCordPar2",4,  1.16726175299287)
-    val connectedComponents: VertexRDD[VertexId] =dbscan.run(sc);
-    connectedComponents.collect().foreach(
-      x=>println(x._1+" idcluster "+x._2)
-    )
+    val connectedComponents =dbscan.run(sc);
+
    val clusteredCoordinates= coordinateRDD.leftOuterJoin(connectedComponents).map {
       case (id, (coordinate, Some(cluster))) => (coordinate.x+","+coordinate.y+","+ cluster)
        case (id, (coordinate, None)) => (coordinate.x+","+coordinate.y+","+"-2")

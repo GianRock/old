@@ -15,8 +15,11 @@ import scala.concurrent.Future
 object TweetCollection {
 
 
-
-
+  /**
+    *
+    * @param idTweet
+    * @return
+    */
   def findTweetById(idTweet:Long):Option[Tweet]={
     val res: BasicDBObject =MongoClient("localhost", 27017)(Constant.MONGO_DB_NAME).getCollection(Constant.MONGO_TWEET_COLLECTION_NAME).findOne(MongoDBObject("_id"->idTweet)).asInstanceOf[BasicDBObject]
 
@@ -47,6 +50,9 @@ object TweetCollection {
     Console.err.println("")
   }
 
+  /**
+    *
+    */
   def findAllTweets() = {
 
     val collection: MongoCollection = MongoCLientSingleton.clientMongo(MONGO_DB_NAME)("tweets")

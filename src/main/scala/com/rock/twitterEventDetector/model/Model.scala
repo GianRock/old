@@ -26,8 +26,10 @@ object Model {
     * @param splittedHashTags
     */
   case class Tweet(id:Long,text:String,createdAt:Date,hashTags:List[String],splittedHashTags:Option[String]){
-    def this(bsonDoc:BasicDBObject) =
+    def this(bsonDoc:BasicDBObject) ={
       this(bsonDoc.getLong("_id"),bsonDoc.getString("cleaned_text"),bsonDoc.getDate("created_at"),List.empty[String],None)
+
+    }
 
 
 

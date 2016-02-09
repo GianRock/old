@@ -1,3 +1,4 @@
+/*
 package com.rock.twitterEventDetector.dbscanScala
 
 import org.apache.spark.rdd.RDD
@@ -107,7 +108,7 @@ class DbscanScalaSpark (data : RDD[(Long, CoordinateInstance)] = null, execution
     val start: Map[Long, List[Long]] =newcollisionGrouped.collectAsMap()
 
     val z:Map[Long, scala.List[Long]]=start.map(x=>(x._1,traverse(start,x._1)))
-    println("PRIMA ESPANZIONE ")
+    println("PRIMA ESPANSIONE ")
     z.foreach(x=>println(x))
 
     println("RESULT  DOPO ESPANSIONE "+z.size)
@@ -150,3 +151,4 @@ class DbscanScalaSpark (data : RDD[(Long, CoordinateInstance)] = null, execution
 
   }
 }
+*/

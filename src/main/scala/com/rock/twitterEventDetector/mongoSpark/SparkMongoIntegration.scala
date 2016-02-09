@@ -166,7 +166,7 @@ object SparkMongoIntegration {
 
   val firstTweets=tweets.take(100)
     val annotator=new DbpediaSpootLightAnnotator
-
+/*
     firstTweets.par.foreach{
       case(id,tweet)=>{
         val annotations: List[DbpediaAnnotation] =annotator.annotateTweet(tweet)
@@ -174,7 +174,7 @@ object SparkMongoIntegration {
       }
 
 
-    }
+    }*/
 
      System.out.println(tweets.count())
     sc.stop()
