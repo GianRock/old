@@ -7,12 +7,46 @@ import com.rock.twitterEventDetector.configuration.Constant
 import com.rock.twitterEventDetector.model.Model.{DbpediaAnnotation, DbpediaResource, Tweet}
 import com.rock.twitterEventDetector.nlp.DbpediaSpootLightAnnotator
 import  com.rock.twitterEventDetector.configuration.Constant._
+import scala.annotation.tailrec
 import scala.concurrent.Future
 
 /**
   * Created by rocco on 07/02/16.
   */
 object TweetCollection {
+/*s
+  def generateCouplesFromListTailRecursive(lista:List[Long]):Set[(Long,Long)]={
+
+    def generate(list:List[Long],acc:Set[(Long,Long)])= {
+      lista match {
+        case Nil=>acc
+        case head::h2::tail=>
+      }
+
+    }
+    // require(lista.size>1)
+    lista match{
+      case Nil=>Nila
+      //  case head::Nil=>Nil
+      case head::head2::tail=>
+        (head,head2)::generateCouplesFromList(head::tail):::generateCouplesFromList(head2::tail)
+    }
+  }*/
+
+
+
+  def generaMio(lista:List[Int]):List[(Int,Int)]={
+  // require(lista.size>1)
+    lista match{
+    case Nil=>Nil
+    case head::Nil=>Nil
+     case head::head2::tail=>
+       (head,head2)::generaMio(head::tail):::generaMio(head2::tail)
+   }
+ }
+
+
+
 
 
   /**
@@ -110,12 +144,16 @@ object TweetCollection {
 
   def main(args: Array[String]) {
     //TweetCollection.findAllTweets()
-
+    /*
    val tweet= TweetCollection.findTweetById(256230354485145600L)
     tweet match{
       case(Some(x))=>print(x)
       case (None)=>println(" id notFound")
     }
+  }*/
+  val lista=List(1L,2L,3L,4L)
+    //generateCouplesFromList(lista).foreach(println)
   }
+
 
 }

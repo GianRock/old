@@ -13,7 +13,7 @@ import scala.collection.{Map, mutable}
   * More precisely, given an rdd  of any types of objects
   * for whome is defined some distance measures,
   * it firsts compute a new RDD mad of all the couples (a,b) whose distance is below a certain treshold Eps.
-  * this Rdd can be viewed as a DAG where the vertex are the objects and the edges will connect all the couples
+  * this Rdd can be viewed as a DG where the vertex are the objects and the edges will connect all the couples
   * (a,b) where d(a,b)<Eps
   *
   * If we use the function ConnectedComponents on that Dag, it will return
@@ -50,7 +50,7 @@ class DbscanScalaSparkWithGraphX [T <: Distance[T]](data : RDD[(Long, T)] = null
 
 
     val graph: Graph[Int, Int] = Graph.fromEdgeTuples(ris, 1)
-    val connectedComponents: VertexRDD[VertexId] = graph.connectedComponents().vertices;
+    val connectedComponents: VertexRDD[VertexId] = graph.connectedComponents().vertices
     connectedComponents
 /*
     val clusteredData: RDD[(VertexId, T, VertexId)] =

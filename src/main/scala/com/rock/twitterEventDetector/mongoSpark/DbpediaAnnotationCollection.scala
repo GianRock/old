@@ -2,8 +2,10 @@ package com.rock.twitterEventDetector.mongoSpark
 
 import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.{BasicDBObject, DBObject, MongoException}
-import com.rock.twitterEventDetector.model.Model.DbpediaAnnotation
+import com.rock.twitterEventDetector.model.Model.{Tweet, DbpediaAnnotation}
 import com.rock.twitterEventDetector.configuration.Constant._
+import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkContext, SparkConf}
 
 import scala.collection.JavaConverters._
 
@@ -88,6 +90,16 @@ object DbpediaAnnotationCollection {
   def main(args: Array[String]) {
     val annotations=DbpediaAnnotationCollection.getAnnotationsOfTweet(33l)
     println(annotations)
+
+  val ids=List(256121411834368000L,256121411851128832L,256230354388660225L,256121411859525632L)
+    val sparkConf = new SparkConf()
+      .setAppName("LSH")
+      .setMaster("local[*]")
+    val sc = new SparkContext("local", "SparkExample", sparkConf)
+
+   val tweetsRDD: RDD[Tweet] = sc.parallelize(ids).flatMap(id=>TweetCollection.findTweetById(id))
+    tweetsRDD.collect().foreach(println)
+
 
   }
 
