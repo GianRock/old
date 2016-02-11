@@ -6,21 +6,11 @@ package com.rock.twitterEventDetector.dbscanTweet
 import java.{util, lang}
 import java.util.Date
 
-import _root_.dbscanTweet.Distances._
-import _root_.model.Model.AnnotatedTweet
-import _root_.model.Model.AnnotatedTweet
-import _root_.model.Model.AnnotatedTweetWithDbpediaResources
-import _root_.model.Model.AnnotatedTweetWithDbpediaResources
-import _root_.model.Model.AnnotatedTweetWithDbpediaResources
-import _root_.model.Model.DbpediaResource
-import _root_.model.Model.DbpediaResource
-import _root_.mongoSpark.DbpediaCollection
-import _root_.mongoSpark.DbpediaCollection
 import com.rock.twitterEventDetector.mongoSpark.{TweetCollection, SparkMongoIntegration, DbpediaAnnotationCollection, DbpediaCollection}
 import com.mongodb.casbah.commons.Imports
 import com.mongodb. hadoop.{MongoOutputFormat, BSONFileOutputFormat}
 import com.rock.twitterEventDetector.lsh.LSHModel
-import com.rock.twitterEventDetector.model.Model.{DbpediaResource, AnnotatedTweetWithDbpediaResources, AnnotatedTweet, Tweet}
+import com.rock.twitterEventDetector.model.Model._
 import com.rock.twitterEventDetector.nlp.DbpediaSpootLightAnnotator
 import com.rock.twitterEventDetector.nlp.indexing.{AnalyzerUtils, MyAnalyzer}
 
@@ -177,159 +167,329 @@ object TweetClustering {
     }.toList
     candidateList
   }
-  /**
-    *
-    * @param sc
-    * @param data
-    * @param minPts
-    * @param eps
-    */
-  def startClusteringTweets(sc: SparkContext,
-                            data: RDD[(Long, Tweet)],
-                            lshModel: LSHModel,
-                            minPts: Int, eps: Double)  = {
-
-    data.cache()
-    /**
-      *a partire dal modello lsh
-      * creo un indexed rdd che ad ogni id documento
-      * associa un interable di coppie (banda,signature)
-      */
-    val invertedLsh: RDD[(Long, Iterable[(Int, String)])] =lshModel.hashTables.map{
-      case(hashkey,id)=>(id,hashkey)
-    }.groupByKey()
-    // implicit val serializer=new Tuple2Serializer[Int,String]
-    // implicit val serializer2=new Tuple2Serializer[Long,Iterable[(Int,String)]]
-
-    val indexedInvertedLsh: IndexedRDD[Long, Iterable[(Int, String)]] = IndexedRDD(invertedLsh).cache()
-
-
-    /**
-      * creo un indexRDD
-      * che per ogni ad ogni (banda,signature) associa
-      * la lista degli id dei documenti che ricadono
-      * in tale bucket
-      */
-    val indexedHashTable: IndexedRDD[String, Iterable[Long]] =
-      IndexedRDD(lshModel.hashTables.groupByKey().map(x=>(x._1._1.toString+"-"+x._1._2,x._2))).cache()
-
-
-    //data.cache()
-
-
-    /*
-        val candidatesNeighbors: RDD[(Long, Long)] = indexedHashTable.flatMap{
-             case(_,listCandidateNeighbors)=>generateCouplesFromList(listCandidateNeighbors.toList.distinct).map(x=>x)
-           }.cache()
-
-    println(indexedInvertedLsh.count())
-     println(candidatesNeighbors.count())
-        println(candidatesNeighbors.distinct().count())
 
 
 
-       //
-        //
-        val ida: RDD[VertexId] =candidatesNeighbors.map{case(ida,idb)=>ida}
-        val idb: RDD[VertexId] =candidatesNeighbors.map{case(ida,idb)=>idb}
+  def annotatateTweetRDDAndSaveResult( tweets:RDD[(VertexId, Tweet)])= {
 
-       val tweetA=ida.zip(data.map(x=>x._2))
-       val tweetB=ida.zip(data.map(x=>x._2))
-
-
-
-           */
-    //lshModel.hashTables.foldByKey(Nil,)
-
-
-
-
-
-
-
-    /**
-      * primo passo da fare è generare
-      * per ogni tweet vettori di hashingTF
-      */
-    val sizeDictionary = Math.pow(2, 18).toInt
-
-
-    //val tfIdfVectors: RDD[(Long, SparseVector)] = generateTfIdfVectors(data, sizeDictionary)
-    //fIdfVectors.cache()
-    val annotatedTweets=nlpPipeLine(data,sizeDictionary)
-
-    val annotatedWithResources=annotatedTweets.map{
-      annotatetTweet=> {
-        val dbpediaResources: Set[DbpediaResource] =annotatetTweet._2.urisDbpedia.flatMap {
-          uriDbpedia => DbpediaCollection.findDbpediaResourceByURI(uriDbpedia)
-        }.toSet
-        (annotatetTweet._1,new  AnnotatedTweetWithDbpediaResources(annotatetTweet._2.tweet,annotatetTweet._2.tfIdfVector,dbpediaResources))
-      }
-    }.collect().toSeq
-
-    val objectNeighborsList: Seq[(VertexId, VertexId)] = annotatedWithResources.flatMap {
-      case (idTweetA: Long, annotatedTweetA:AnnotatedTweetWithDbpediaResources) =>
-
-        /**
-          * retrive the candidate list-neighbors from the lsh model
-          */
-        val candidateNeighbors: List[Long] =getCandidateListFromIndexedRDD(indexedInvertedLsh,indexedHashTable,idTweetA)
-
-        //lshModel.getCandidates(idTweetA).collect().toList
-
-
-        val candidateVectors = annotatedWithResources.filter(x => candidateNeighbors.contains(x._1))
-
-        /**
-          * warn!! the candidate list should be filtered to avoid false positive.
-          * i.e those
-          * object who lies in the same bucket of current object,
-          * but whose distance is greater than the given
-          * treshold eps
-          */
-        val neighborList = candidateVectors flatMap {
-          case (idTweetB, annotatedTweetB) =>
-            val timeSimilarity=timeDecayFunction(annotatedTweetA.tweet.createdAt,annotatedTweetB.tweet.createdAt)
-
-            if(timeSimilarity>=0){
-              val cosSim =  cosineSimilarity(annotatedTweetA.tfIdfVector, annotatedTweetB.tfIdfVector)
-              if((1-cosSim)<=2*eps){
-                val semanticSim=semanticSimilarity(annotatedTweetA.dbpediaResoruceSet,annotatedTweetB.dbpediaResoruceSet)
-
-                val similarity=timeSimilarity*((cosSim+semanticSim)/2)
-                val distance=1d-similarity
-
-                if (distance <= eps)
-                  Some(idTweetA, idTweetB)
-                else
-                  None
-              }else None
-            } else None
+tweets.cache()
+    val c= tweets.mapPartitions{
+      it => {
+        val annotator = new DbpediaSpootLightAnnotator
+        val anns: Iterator[(Long, List[DbpediaAnnotation])] = it.map {
+          case (idtweet, tweet) => {
+            val annotations = annotator.annotateText(tweet.text).getOrElse(List.empty[DbpediaAnnotation])
+            DbpediaAnnotationCollection.insertDbpediaAnnotationsOfTweet(idtweet,annotations)
+            (idtweet, annotations)
+          }
         }
-        neighborList
+       // .inserDbpediaAnnotationsBulk2(anns)
+        anns
+       // anns.size
+
+      }
+    }
+   println(c.count())
+  }
+
+    /**
+      *
+      * @param sc
+      * @param data
+      * @param minPts
+      * @param eps
+      */
+    def startClusteringTweets(sc: SparkContext,
+                              data: RDD[(Long, Tweet)],
+                              lshModel: LSHModel,
+                              minPts: Int, eps: Double)  = {
+
+      data.cache()
+      /**
+        *a partire dal modello lsh
+        * creo un indexed rdd che ad ogni id documento
+        * associa un interable di coppie (banda,signature)
+        */
+      val invertedLsh: RDD[(Long, Iterable[(Int, String)])] =lshModel.hashTables.map{
+        case(hashkey,id)=>(id,hashkey)
+      }.groupByKey()
+      // implicit val serializer=new Tuple2Serializer[Int,String]
+      // implicit val serializer2=new Tuple2Serializer[Long,Iterable[(Int,String)]]
+
+      val indexedInvertedLsh: IndexedRDD[Long, Iterable[(Int, String)]] = IndexedRDD(invertedLsh).cache()
+
+
+      /**
+        * creo un indexRDD
+        * che per ogni ad ogni (banda,signature) associa
+        * la lista degli id dei documenti che ricadono
+        * in tale bucket
+        */
+      val indexedHashTable: IndexedRDD[String, Iterable[Long]] =
+        IndexedRDD(lshModel.hashTables.groupByKey().map(x=>(x._1._1.toString+"-"+x._1._2,x._2))).cache()
+
+
+      //data.cache()
+
+
+      /*
+          val candidatesNeighbors: RDD[(Long, Long)] = indexedHashTable.flatMap{
+               case(_,listCandidateNeighbors)=>generateCouplesFromList(listCandidateNeighbors.toList.distinct).map(x=>x)
+             }.cache()
+
+      println(indexedInvertedLsh.count())
+       println(candidatesNeighbors.count())
+          println(candidatesNeighbors.distinct().count())
+
+
+
+         //
+          //
+          val ida: RDD[VertexId] =candidatesNeighbors.map{case(ida,idb)=>ida}
+          val idb: RDD[VertexId] =candidatesNeighbors.map{case(ida,idb)=>idb}
+
+         val tweetA=ida.zip(data.map(x=>x._2))
+         val tweetB=ida.zip(data.map(x=>x._2))
+
+
+
+             */
+      //lshModel.hashTables.foldByKey(Nil,)
+
+
+
+
+
+
+
+      /**
+        * primo passo da fare è generare
+        * per ogni tweet vettori di hashingTF
+        */
+      val sizeDictionary = Math.pow(2, 18).toInt
+
+
+      //val tfIdfVectors: RDD[(Long, SparseVector)] = generateTfIdfVectors(data, sizeDictionary)
+      //fIdfVectors.cache()
+      val annotatedTweets=nlpPipeLine(data,sizeDictionary)
+
+      val annotatedWithResources: Seq[(VertexId, AnnotatedTweetWithDbpediaResources)] =annotatedTweets.map{
+        annotatetTweet=> {
+          val dbpediaResources: Set[DbpediaResource] =annotatetTweet._2.urisDbpedia.flatMap {
+            uriDbpedia => DbpediaCollection.findDbpediaResourceByURI(uriDbpedia)
+          }.toSet
+          (annotatetTweet._1,new  AnnotatedTweetWithDbpediaResources(annotatetTweet._2.tweet,annotatetTweet._2.tfIdfVector,dbpediaResources))
+        }
+      }.collect().toSeq
+      //   val annotatedWithResourcesCollected=annotatedWithResources.collect().toSeq
+      val objectNeighborsList: Seq[(VertexId, VertexId)] = annotatedWithResources.flatMap {
+        case (idTweetA: Long, annotatedTweetA:AnnotatedTweetWithDbpediaResources) =>
+
+          /**
+            * retrive the candidate list-neighbors from the lsh model
+            */
+          val candidateNeighbors: List[Long] =getCandidateListFromIndexedRDD(indexedInvertedLsh,indexedHashTable,idTweetA)
+
+          //lshModel.getCandidates(idTweetA).collect().toList
+
+
+          val candidateVectors = annotatedWithResources.filter(x => candidateNeighbors.contains(x._1))
+
+          /**
+            * warn!! the candidate list should be filtered to avoid false positive.
+            * i.e those
+            * object who lies in the same bucket of current object,
+            * but whose distance is greater than the given
+            * treshold eps
+            */
+          val neighborList = candidateVectors flatMap {
+            case (idTweetB, annotatedTweetB) =>
+              val timeSimilarity=timeDecayFunction(annotatedTweetA.tweet.createdAt,annotatedTweetB.tweet.createdAt)
+
+              if(timeSimilarity>=0){
+                val cosSim =  cosineSimilarity(annotatedTweetA.tfIdfVector, annotatedTweetB.tfIdfVector)
+                if((1-cosSim)<=2*eps){
+                  val semanticSim=semanticSimilarity(annotatedTweetA.dbpediaResoruceSet,annotatedTweetB.dbpediaResoruceSet)
+
+                  val similarity=timeSimilarity*((cosSim+semanticSim)/2)
+                  val distance=1d-similarity
+
+                  if (distance <= eps)
+                    Some(idTweetA, idTweetB)
+                  else
+                    None
+                }else None
+              } else None
+          }
+          neighborList
+
+
+      }
+
+      /**
+        * a partire dall
+        */
+      val filteredneighList: RDD[(VertexId, VertexId)] =  sc.parallelize(objectNeighborsList).groupByKey().
+        filter(x => x._2.size > minPts).flatMap {
+        case (idCore: Long, listNeighbor: Iterable[Long]) => listNeighbor map {
+          neighbor => (idCore, neighbor)
+
+        }
+      }.cache()
+
+      val graph: Graph[Int, Int] = Graph.fromEdgeTuples(filteredneighList, 1)
+      val connectedComponents: VertexRDD[VertexId] = graph.connectedComponents().vertices;
+
+
+      // objectNeighborsList.foreach(x=>println(x._1+" vicinato "+x._2))
+      connectedComponents
+
+    }
+
+
+    /**
+      *
+      * @param sc
+      * @param data
+      * @param minPts
+      * @param eps
+      */
+    def clusteringTweets(sc: SparkContext,
+                         data: RDD[(Long, Tweet)],
+                         lshModel: LSHModel,
+                         minPts: Int, eps: Double)  = {
+
+      data.cache()
+      /**
+        *a partire dal modello lsh
+        * creo un indexed rdd che ad ogni id documento
+        * associa un interable di coppie (banda,signature)
+        */
+      val invertedLsh: RDD[(Long, Iterable[(Int, String)])] =lshModel.hashTables.map{
+        case(hashkey,id)=>(id,hashkey)
+      }.groupByKey()
+      // implicit val serializer=new Tuple2Serializer[Int,String]
+      // implicit val serializer2=new Tuple2Serializer[Long,Iterable[(Int,String)]]
+
+      val indexedInvertedLsh: IndexedRDD[Long, Iterable[(Int, String)]] = IndexedRDD(invertedLsh).cache()
+
+
+      /**
+        * creo un indexRDD
+        * che per ogni ad ogni (banda,signature) associa
+        * la lista degli id dei documenti che ricadono
+        * in tale bucket
+        */
+      val indexedHashTable: IndexedRDD[String, Iterable[Long]] =
+        IndexedRDD(lshModel.hashTables.groupByKey().map(x=>(x._1._1.toString+"-"+x._1._2,x._2))).cache()
+
+
+
+
+
+
+
+
+
+      /**
+        * primo passo da fare è generare
+        * per ogni tweet vettori di hashingTF
+        */
+      val sizeDictionary = Math.pow(2, 18).toInt
+
+
+      //val tfIdfVectors: RDD[(Long, SparseVector)] = generateTfIdfVectors(data, sizeDictionary)
+      //fIdfVectors.cache()
+      val annotatedTweets=nlpPipeLine(data,sizeDictionary)
+
+      val annotatedWithResources =annotatedTweets.map{
+        annotatetTweet=> {
+          val dbpediaResources: Set[DbpediaResource] =annotatetTweet._2.urisDbpedia.flatMap {
+            uriDbpedia => DbpediaCollection.findDbpediaResourceByURI(uriDbpedia)
+          }.toSet
+          (annotatetTweet._1,new  AnnotatedTweetWithDbpediaResources(annotatetTweet._2.tweet,annotatetTweet._2.tfIdfVector,dbpediaResources))
+        }
+      }
+
+      val indexedAnnotated=IndexedRDD(annotatedWithResources)
+      val ids=indexedAnnotated.keys.collect().toSeq
+      /**
+        *
+        */
+      val actualNeighborList: Seq[(VertexId, VertexId)] =ids.flatMap{
+        case(idTweetA)=>{
+          val annotatedTweetA=indexedAnnotated.get(idTweetA).get
+          /**
+            * retrive the candidate list-neighbors from the lsh model
+            */
+          val candidateNeighborsIds: List[Long] =getCandidateListFromIndexedRDD(indexedInvertedLsh,indexedHashTable,idTweetA)
+          val candidateObjects: List[(VertexId, AnnotatedTweetWithDbpediaResources)] =candidateNeighborsIds.map{ id=>(id,indexedAnnotated.get(id).get)}
+
+          /**
+            * warn!! the candidate list should be filtered to avoid false positive.
+            * i.e those
+            * object who lies in the same bucket of current object,
+            * but whose distance is greater than the given
+            * treshold eps
+            */
+          val neighborList = candidateObjects flatMap {
+            case (idTweetB, annotatedTweetB) =>
+              val timeSimilarity=timeDecayFunction(annotatedTweetA.tweet.createdAt,annotatedTweetB.tweet.createdAt)
+
+              if(timeSimilarity>=0){
+                val cosSim =  cosineSimilarity(annotatedTweetA.tfIdfVector, annotatedTweetB.tfIdfVector)
+                if((1-cosSim)<=2*eps){
+                  val semanticSim=semanticSimilarity(annotatedTweetA.dbpediaResoruceSet,annotatedTweetB.dbpediaResoruceSet)
+
+                  val similarity=timeSimilarity*((cosSim+semanticSim)/2)
+                  val distance=1d-similarity
+
+                  if (distance <= eps)
+                    Some(idTweetA, idTweetB)
+                  else
+                    None
+                }else None
+              } else None
+          }
+          neighborList
+
+
+
+
+        }
+      }
+
+
+      val filteredneighList: RDD[(VertexId, VertexId)] =  sc.parallelize(actualNeighborList).groupByKey().
+        filter(x => x._2.size > minPts).flatMap {
+        case (idCore: Long, listNeighbor: Iterable[Long]) => listNeighbor map {
+          neighbor => (idCore, neighbor)
+
+        }
+      }.cache()
+
+      val graph: Graph[Int, Int] = Graph.fromEdgeTuples(filteredneighList, 1)
+      val connectedComponents: VertexRDD[VertexId] = graph.connectedComponents().vertices;
+
+
+      // objectNeighborsList.foreach(x=>println(x._1+" vicinato "+x._2))
+      connectedComponents
 
 
     }
 
-    /**
-      * a partire dall
-      */
-    val filteredneighList: RDD[(VertexId, VertexId)] =  sc.parallelize(objectNeighborsList).groupByKey().
-      filter(x => x._2.size > minPts).flatMap {
-      case (idCore: Long, listNeighbor: Iterable[Long]) => listNeighbor map {
-        neighbor => (idCore, neighbor)
-
-      }
-    }.cache()
-
-    val graph: Graph[Int, Int] = Graph.fromEdgeTuples(filteredneighList, 1)
-    val connectedComponents: VertexRDD[VertexId] = graph.connectedComponents().vertices;
 
 
-    // objectNeighborsList.foreach(x=>println(x._1+" vicinato "+x._2))
-    connectedComponents
 
-  }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -345,33 +505,11 @@ object TweetClustering {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     val minDAte = TweetCollection.findMinValueDate()
     println("min date value" + minDAte)
 
     val maxDate = new Date(minDAte.getTime + 10000)
-    val tweetsfirst72H = SparkMongoIntegration.getTweetsFromDateOffset(sc, minDAte, 2)
+    val tweetsfirst72H: RDD[(VertexId, Tweet)] = SparkMongoIntegration.getTweetsFromDateOffset(sc, minDAte,72)
     //  val tentweets=tweetsfirst72H.take(10);
     tweetsfirst72H.cache()
     println(" NUMBER Of tweeets" + tweetsfirst72H.count())
@@ -389,12 +527,15 @@ object TweetClustering {
     //model.save(sc, "target/first72-13r10b")
 
 
-    val lshModelLoaded: LSHModel = LSHModel.load(sc, "target/first72-13r10b")
+   // val lshModelLoaded: LSHModel = LSHModel.load(sc, "target/first72-13r10b")
 
     println("finished loading lsh model")
-    startClusteringTweets(sc,tweetsfirst72H,lshModelLoaded,20,0.35)
+    annotatateTweetRDDAndSaveResult(tweetsfirst72H)
+    //clusteringTweets(sc,tweetsfirst72H,lshModelLoaded,20,0.35)
 
-  }}
+  }
+
+}
 // startClusteringTweets(sc: SparkContext, tweetsfirst72H, lshModelLoaded,10,0.35)
 
 

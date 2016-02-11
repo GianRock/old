@@ -13,13 +13,28 @@ import scala.collection.JavaConverters._
   * Created by rocco on 03/02/2016.
   */
 object DbpediaAnnotationCollection {
-  def inserDbpediaAnnotationsBulk(  annotations:Iterator[(Long, Option[List[DbpediaAnnotation]])])={
+  def inserDbpediaAnnotationsBulk(  annotations:Iterator[(Long, Option[List[DbpediaAnnotation]])]  )={
 
 
     val collection=MongoCLientSingleton.clientMongo(MONGO_DB_NAME).getCollection("dbpediaAnnotations")
     val bulkWrites=collection.initializeUnorderedBulkOperation()
      annotations.foreach(annotation=>{
        bulkWrites.insert(MongoDBObject("_id"->annotation._1,"annotations"->annotation._2.get.map(ann=>ann.toMaps)))
+    })
+
+    println(" ADDING "+annotations.size+ " annotations to db")
+    bulkWrites.execute()
+
+
+  }
+
+  def inserDbpediaAnnotationsBulk2(  annotations:Iterator[(Long, List[DbpediaAnnotation])])={
+  println(" sto aggiungendo ")
+
+    val collection=MongoCLientSingleton.clientMongo(MONGO_DB_NAME).getCollection("dbpediaAnnotations")
+    val bulkWrites=collection.initializeUnorderedBulkOperation()
+    annotations.foreach(annotation=>{
+      bulkWrites.insert(MongoDBObject("_id"->annotation._1,"annotations"->annotation._2.map(ann=>ann.toMaps)))
     })
 
     println(" ADDING "+annotations.size+ " annotations to db")

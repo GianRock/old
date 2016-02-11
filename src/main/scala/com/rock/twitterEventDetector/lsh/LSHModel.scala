@@ -123,7 +123,7 @@ object LSHModel {
 
       implicit val formats = DefaultFormats
       val (className, formatVersion, metadata) = Loader.loadMetadata(sc, path)
-      assert(className == thisClassName)
+      //assert(className == thisClassName)
       assert(formatVersion == thisFormatVersion)
       val hashTables = sc.textFile(Loader.dataPath(path))
         .map(x => x.split(","))

@@ -1,6 +1,8 @@
 package com.rock.twitterEventDetector.mongoSpark
 
-import com.mongodb.{BasicDBObject, DBObject}
+import java.util.Date
+
+import com.mongodb.{DBCursor, BasicDBObject, DBObject}
 import com.mongodb.casbah._
 import com.mongodb.casbah.commons.MongoDBObject
 import com.rock.twitterEventDetector.configuration.Constant
@@ -47,7 +49,13 @@ object TweetCollection {
 
 
 
+ def findMinValueDate():Date={
+   val doc =MongoClient("localhost", 27017)(Constant.MONGO_DB_NAME)
+     .getCollection(Constant.MONGO_TWEET_COLLECTION_NAME).find(MongoDBObject(),MongoDBObject("_id"->0,"created_at"->1)).sort(MongoDBObject("created_at"->1)).limit(1).one()
 
+  doc.get("created_at").asInstanceOf[Date]
+
+ }
 
   /**
     *
@@ -152,6 +160,8 @@ object TweetCollection {
     }
   }*/
   val lista=List(1L,2L,3L,4L)
+
+   print(TweetCollection.findMinValueDate())
     //generateCouplesFromList(lista).foreach(println)
   }
 
